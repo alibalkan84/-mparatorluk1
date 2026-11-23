@@ -19,7 +19,10 @@ jobs:
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/res/mipmap-hdpi
           [ -f AndroidManifest.xml ] && cp AndroidManifest.xml app/src/main/
-          [ -f MainActivity.java ] && cp MainActivity.java app/src/main/java/com/kayiobasi/app/
+          if [ -f MainActivity.java ]; then
+            sed -i 's/^package .*/package com.kayiobasi.app;/' MainActivity.java
+            cp MainActivity.java app/src/main/java/com/kayiobasi/app/
+          fi
           [ -f index.html ] && cp index.html app/src/main/assets/
           [ -f ic_launcher.png ] && cp ic_launcher.png app/src/main/res/mipmap-hdpi/
 
