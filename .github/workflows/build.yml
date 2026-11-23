@@ -18,13 +18,66 @@ jobs:
           mkdir -p app/src/main/java/com/kayiobasi/app
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/res/mipmap-hdpi
-          [ -f AndroidManifest.xml ] && cp AndroidManifest.xml app/src/main/
-          if [ -f MainActivity.java ]; then
-            sed -i 's/^package .*/package com.kayiobasi.app;/' MainActivity.java
-            cp MainActivity.java app/src/main/java/com/kayiobasi/app/
-          fi
           [ -f index.html ] && cp index.html app/src/main/assets/
           [ -f ic_launcher.png ] && cp ic_launcher.png app/src/main/res/mipmap-hdpi/
+
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <application
+              android:label="KayiObasi"
+              android:usesCleartextTraffic="true"
+              android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+              <activity
+                android:name=".MainActivity"
+                android:exported="true">
+                <intent-filter>
+                  <action android:name="android.intent.action.MAIN" />
+                  <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+              </activity>
+            </application>
+          </manifest>
+          EOF
+
+          cat << 'EOF' > app/src/main/java/com/kayiobasi/app/MainActivity.java
+          package com.kayiobasi.app;
+
+          import android.os.Bundle;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import androidx.appcompat.app.AppCompatActivity;
+
+          public class MainActivity extends AppCompatActivity {
+            private WebView webView;
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+              super.onCreate(savedInstanceState);
+              webView = new WebView(this);
+              setContentView(webView);
+
+              WebSettings settings = webView.getSettings();
+              settings.setJavaScriptEnabled(true);
+              settings.setDomStorageEnabled(true);
+              settings.setAllowFileAccess(true);
+
+              webView.setWebViewClient(new WebViewClient());
+              webView.loadUrl("file:///android_asset/index.html");
+            }
+
+            @Override
+            public void onBackPressed() {
+              if (webView != null && webView.canGoBack()) {
+                webView.goBack();
+              } else {
+                super.onBackPressed();
+              }
+            }
+          }
+          EOF
 
       - name: Configure Android Gradle files
         run: |
@@ -111,4 +164,3 @@ jobs:
         with:
           name: app-debug
           path: "**/*.apk"
-          
